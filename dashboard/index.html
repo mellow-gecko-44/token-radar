@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Launch Radar — radar-2</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="dot" aria-hidden="true"></span><span class="brand-name">TOKEN LAUNCH RADAR</span><span class="brand-model">radar-2</span></div>
+  <div class="top-meta" id="top-meta"></div>
+</header>
+<main>
+  <section class="lede">
+    <h1>The 203 pre-token protocols worth farming first</h1>
+    <p id="lede-text"></p>
+    <dl class="facts" id="facts"></dl>
+  </section>
+
+  <section class="how" aria-label="How to use this radar">
+    <ol>
+      <li><strong>Find it.</strong> The board ranks every pre-token protocol the snapshot can vouch for — the 40 on the watchlist first, then the 163 early finds the watchlist leaves out.</li>
+      <li><strong>Read the model.</strong> Each row shows the multiple, the growth factor and the maturity factor behind its implied value. Change the weights in the sandbox and the board re-ranks live.</li>
+      <li><strong>Farm it.</strong> Open a protocol for its seven-step farm plan: what to do, what it costs, how long it takes — and the launch signal to watch for.</li>
+    </ol>
+  </section>
+
+  <section class="controls" aria-label="Board controls">
+    <div class="field">
+      <label for="q">Search</label>
+      <input id="q" type="search" placeholder="Name or slug" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="category">Category</label>
+      <select id="category"><option value="">All categories</option></select>
+    </div>
+    <div class="field">
+      <label for="chain">Chain</label>
+      <select id="chain"><option value="">All chains</option></select>
+    </div>
+    <label class="check"><input type="checkbox" id="watchlist-only"> Watchlist only</label>
+    <div class="tabs" role="group" aria-label="Board or live tokens">
+      <button type="button" id="tab-board" aria-pressed="true">Board</button>
+      <button type="button" id="tab-live" aria-pressed="false">Live token</button>
+    </div>
+    <p class="count" id="count"></p>
+  </section>
+
+  <section class="panel" aria-label="Ranked board">
+    <p class="sandbox-note" id="sandbox-note" hidden>Sandbox active — these implied values use your weights. The submitted board.json uses the radar-2 defaults.</p>
+    <table id="board">
+      <thead>
+        <tr>
+          <th><button type="button" data-sort="rank">Rank</button></th>
+          <th><button type="button" data-sort="name">Protocol</button></th>
+          <th><button type="button" data-sort="category">Category</button></th>
+          <th><button type="button" data-sort="tvl_usd">TVL</button></th>
+          <th><button type="button" data-sort="change_7d">7d</button></th>
+          <th><button type="button" data-sort="multiple">Multiple</button></th>
+          <th><button type="button" data-sort="implied_value_usd">Implied value</button></th>
+          <th>Share of #1</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="empty" id="empty" hidden>No protocol matches. Clear the search or a filter.</p>
+    <nav class="pager" aria-label="Pages">
+      <button type="button" id="prev-page">← Previous</button>
+      <span id="page-label"></span>
+      <button type="button" id="next-page">Next →</button>
+    </nav>
+  </section>
+
+  <section class="method" aria-label="How the radar scores">
+    <h2>How the radar scores</h2>
+    <p class="formula">implied value = TVL × category multiple × growth factor × maturity factor</p>
+    <div class="method-grid">
+      <div>
+        <h3>The multiple</h3>
+        <p>Each category's median market-cap / TVL among the snapshot's own live-token protocols, shrunk toward the overall median so a category with two members does not set its own multiple, clamped to 0.05–1.5. A lending token earns a lending multiple, a DEX token a DEX multiple — never one hardcoded number for every protocol.</p>
+        <h3>Growth</h3>
+        <p>7-day TVL change, clamped to −50%…+150%, weighted 0.8. A +4,448% week cannot carry a protocol on its own; a −73% week cannot sink one.</p>
+        <h3>Maturity</h3>
+        <p>0.6 + 0.4 × (1 − e<sup>−age / 365</sup>). A protocol that has run a year with no token scores near its full value; one that launched last week scores less; the curve saturates because a launch that has not happened in five years is worth less waiting on.</p>
+        <h3>What counts as pre-token</h3>
+        <p>A protocol records no token at all: no market cap, no CoinGecko id, no symbol. Wrapped, staked and bridged products of tokens that already trade are excluded, and so are exchanges and versioned pools — a V2 pool is not a new launch. Live-token protocols are kept apart, shown with the market's own values.</p>
+      </div>
+      <div>
+        <h3>Category multiples</h3>
+        <table class="multiples" id="multiples">
+          <thead><tr><th>Category</th><th>Members</th><th>Multiple</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="note" id="multiples-note"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sandbox" aria-label="Model sandbox">
+    <h2>Model sandbox</h2>
+    <p>Change the weights and the board re-ranks live. The submitted board.json always uses the radar-2 defaults — this sandbox only re-ranks the page, so you can see how much the answer depends on each weight.</p>
+    <div class="sliders">
+      <label>Growth weight <span id="gw-value">0.80</span>
+        <input type="range" id="gw" min="0" max="1.5" step="0.05" value="0.8">
+      </label>
+      <label>Maturity horizon, days <span id="mh-value">365</span>
+        <input type="range" id="mh" min="180" max="1095" step="15" value="365">
+      </label>
+      <label>Multiple cap <span id="mc-value">1.50</span>
+        <input type="range" id="mc" min="0.5" max="2" step="0.05" value="1.5">
+      </label>
+      <button type="button" id="reset-model">Reset to radar-2</button>
+    </div>
+  </section>
+
+  <section class="data-note" aria-label="About the data">
+    <h2>About the data</h2>
+    <p id="data-note"></p>
+  </section>
+</main>
+<footer>
+  <p>Token Launch Radar · radar-2 · Built from one sealed snapshot. No prices are fetched, no network is used, and no protocol name is ever special-cased.</p>
+</footer>
+
+<dialog id="detail" aria-label="Protocol detail">
+  <form method="dialog"><button class="close" aria-label="Close">×</button></form>
+  <div id="detail-body"></div>
+</dialog>
+
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
